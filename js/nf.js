@@ -411,11 +411,23 @@ function getViewParam()
 }
 
 function categorize() {
+    if (!$.isArray(categories)) {
+        var cats = [];
+        $.each(categories, function(category, projects) {
+            cats.push({
+                name: category,
+                projects: $.map(projects, function(name) {
+                    return {name: name};
+                })
+            });
+        });
+        categories = cats;
+    }
     $.each(categories, function(i, category) {
         $.each(category.projects, function(j, project) {
-            var id = project.id;
+            var name = project.name;
             $.each(reposTab, function(k, repo) {
-                if (repo.repo.id === id) {
+                if (repo.repo.name === name) {
                     project.repo = repo.repo;
                     project.repoIndex = k;
                 }
@@ -423,6 +435,9 @@ function categorize() {
             if (!project.repo) {
                 console.error('no repo found', project);
             }
+        });
+        category.projects = $.grep(category.projects, function(project) {
+            return !!project.repo;
         });
     });
 }
